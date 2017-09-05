@@ -1,0 +1,17 @@
+{
+  "name": "cli-arguments",
+  "version": "1.0.0",
+  "description": "Parse CLI arguments",
+  "main": "cli.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Evgeni Zharkov",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^8.0.26"
+  }
+}
