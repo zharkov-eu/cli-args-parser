@@ -7,21 +7,23 @@
 "use strict";
 
 import * as process from "process";
+import * as error from "./errors";
+import * as parser from "./parser";
 
-type TType = "boolean" | "number" | "string" | "array" | "object" | "user";
+type TType = "boolean" | "integer" | "float" | "string" | "array" | "object" | "exist" | "user";
 
 export interface IProperty {
   Modifier: string; // Модификатор (- | --)
   Name: string; // Название свойства
-  RawValue: string; // Значение свойства (до преобразования в тип)
-  Value: any; // Значение свойства (после преобразования в тип)
+  RawValue?: string; // Значение свойства (до преобразования в тип)
+  Value?: any; // Значение свойства (после преобразования в тип)
 }
 
 interface IPropertyDefinition extends IProperty {
   Deprecated?: boolean; // Вскоре перестанет поддерживаться
   Description?: string; // Описание свойства, используется для вывода справки
   Type: TType; // Тип свойства
-  Transform?: (property: IProperty) => any; // Собственная валидация и трансформация свойства
+  Transform?: (rawValue: string) => any; // Собственная валидация и трансформация свойства
 }
 
 class Property implements IProperty {
@@ -48,7 +50,8 @@ export default class Arguments {
   private name: string;
   private language: string;
   private source: string[];
-  private properties: { [name: string]: IPropertyDefinition };
+  private properties: { [name: string]: IProperty };
+  private propertiesDef: { [name: string]: IPropertyDefinition };
 
   constructor(construct?: IArgumentsConstruct) {
     this.name = construct.name || ""; // TODO: Получать название из package.json;
@@ -56,23 +59,51 @@ export default class Arguments {
     this.source = construct.source || process.argv.slice(2);
     if (Array.isArray(construct.properties) && construct.properties.length) {
       construct.properties.forEach((property) => {
-        this.properties[property.Name] = property;
+        this.propertiesDef[property.Name] = property;
       });
     }
   }
 
   public addProperty(property: IPropertyDefinition) {
-    if (!this.properties[property.Name]) {
-      this.properties[property.Name] = property;
+    if (!this.propertiesDef[property.Name]) {
+      if (typeof property.Transform !== "function") {
+        property.Transform = parser[property.Type];
+      }
+      this.propertiesDef[property.Name] = property;
     }
   }
 
   private parseProperties() {
-    this.source.forEach((part: string) => {
-      if (part.substring(0, 2) === "--") {
-
-      } else if (part.substring(0, 1) === "-") {
-
+    let propertyNameTemp: string = "";
+    this.source.forEach((part: string, index: number) => {
+      if (propertyNameTemp) {
+        if (this.propertiesDef[propertyNameTemp].Type !== "exist") {
+          this.properties[propertyNameTemp].RawValue = part;
+          this.properties[propertyNameTemp].Value = this.propertiesDef[propertyNameTemp].Transform(part);
+          return;
+        } else {
+          this.properties[propertyNameTemp].RawValue = "true";
+          this.properties[propertyNameTemp].Value = true;
+          propertyNameTemp = "";
+        }
+      }
+      if (part[0] === "-") {
+        propertyNameTemp = part[1] === "-" ? part.substring(2) : part.substring(1);
+        const property: IProperty = {
+          Modifier: part[1] === "-" ? "--" : "-",
+          Name: propertyNameTemp,
+        };
+        try {
+          if (!this.propertiesDef[property.Name]) {
+            throw new error.PropertyNoExist(property);
+          }
+          if (this.propertiesDef[property.Name].Deprecated) {
+            throw new error.PropertyDeprecated(property);
+          }
+          this.properties[property.Name] = property;
+        } catch (error) {
+          console.log(error.message);
+        }
       } else {
 
       }
