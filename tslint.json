@@ -9,13 +9,6 @@
     "no-consecutive-blank-lines": [true, 2],
     "interface-over-type-literal": false,
     "max-classes-per-file": [true, 10],
-    "no-console": [true,
-      "debug",
-      "info",
-      "log",
-      "time",
-      "timeEnd",
-      "trace"
-    ]
+    "no-console": [false]
   }
 }

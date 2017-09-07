@@ -6,6 +6,7 @@
 
 "use strict";
 
-export default class Help {
-  private language: string;
-}
+import * as assert from "assert";
+import * as parse from "../app/gettext";
+
+
