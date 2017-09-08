@@ -61,8 +61,10 @@ const ObjectProperty: IPropertyDefinition = {
 };
 
 // Проверка обязательного свойства
-const parseRequiredArguments = new Arguments({properties: [RequiredProperty]});
-console.log(parseRequiredArguments.parseProperties());
+const parseRequiredArgumentsSuccess = new Arguments({properties: [RequiredProperty], source: ["--Req"]});
+const parseRequiredArgumentsFault = new Arguments({properties: [RequiredProperty], source: [""]});
+console.log(parseRequiredArgumentsSuccess.parseProperties());
+console.log(parseRequiredArgumentsFault.parseProperties());
 
 // // Проверка свойства типа существует/не существует
 // const parseExistArguments = new Arguments({properties: [ExistProperty]});

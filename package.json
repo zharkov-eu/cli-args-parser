@@ -1,8 +1,8 @@
 {
   "name": "cli-arguments",
   "version": "1.0.0",
-  "description": "Parse CLI arguments",
-  "main": "cli.js",
+  "description": "Parse command line interpreter arguments",
+  "main": "app/cli.js",
   "directories": {
     "test": "test"
   },
@@ -12,6 +12,6 @@
   "author": "Evgeni Zharkov",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^8.0.26"
+    "@types/node": "^8.0.27"
   }
 }

@@ -7,7 +7,7 @@
 "use strict";
 
 import * as process from "process";
-import * as error from "./errors";
+import * as errors from "./errors";
 import * as parser from "./parser";
 
 type TType = "boolean" | "integer" | "float" | "string" | "array" | "object" | "exist" | "user";
@@ -84,6 +84,7 @@ export class Arguments {
     }
   }
 
+  // TODO: Добавить функции перехвата ошибок
   public parseProperties(): { [name: string]: IPropertyParsed } {
     let propertyNameTemp: string = "";
     let propertyRequiredExist: number = this.propertiesRequired.length;
@@ -93,7 +94,7 @@ export class Arguments {
         try {
           this.properties[propertyNameTemp].Value = this.propertiesDef[propertyNameTemp].Transform(part);
         } catch (error) {
-          throw new error.PropertyValueError(this.propertiesDef[propertyNameTemp]);
+          error.propertyValueError(this.propertiesDef[propertyNameTemp]);
         }
       } else if (part[0] === "-") {
         propertyNameTemp = part[1] === "-" ? part.substring(2) : part.substring(1);
@@ -102,12 +103,8 @@ export class Arguments {
           Name: propertyNameTemp,
         };
         try {
-          if (!this.propertiesDef[property.Name]) {
-            throw new error.PropertyNoExist(property);
-          }
-          if (this.propertiesDef[property.Name].Deprecated) {
-            throw new error.PropertyDeprecated(property);
-          }
+          if (!this.propertiesDef[property.Name]) { errors.propertyNoExist(property); }
+          if (this.propertiesDef[property.Name].Deprecated) { errors.propertyDeprecated(property); }
           this.properties[property.Name] = property;
           if (this.propertiesDef[property.Name].Type === "exist") {
             this.properties[property.Name].RawValue = "true";
@@ -115,19 +112,33 @@ export class Arguments {
             propertyNameTemp = "";
           }
         } catch (error) {
-          console.log(error.message);
+          if (error instanceof errors.PropertyNoExist) {
+            console.error(error.message);
+            process.exit(2);
+          } else if (error instanceof errors.PropertyDeprecated) {
+            console.error(error.message);
+          } else {
+            throw error;
+          }
         }
       }
     });
-    for (const property of Object.keys(this.properties)) {
-      const requiredIndex = this.propertiesRequired.indexOf(this.properties[property].Name);
-      if (requiredIndex !== -1) {
-        this.propertiesRequired.splice(requiredIndex, 1);
-        propertyRequiredExist--;
+    try {
+      for (const property of Object.keys(this.properties)) {
+        const requiredIndex = this.propertiesRequired.indexOf(this.properties[property].Name);
+        if (requiredIndex !== -1) {
+          this.propertiesRequired.splice(requiredIndex, 1);
+          propertyRequiredExist--;
+        }
       }
-    }
-    if (propertyRequiredExist !== 0) {
-      throw new error.PropertyRequired(this.propertiesDef[this.propertiesRequired[0]]);
+      if (propertyRequiredExist !== 0) { errors.propertyRequired(this.propertiesDef[this.propertiesRequired[0]]); }
+    } catch (error) {
+      if (error instanceof errors.PropertyRequired) {
+        console.error(error.message);
+        process.exit(2);
+      } else {
+        throw error;
+      }
     }
     return this.properties;
   }
