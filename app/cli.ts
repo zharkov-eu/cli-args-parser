@@ -52,10 +52,10 @@ interface IArgumentsConstruct {
 }
 
 interface IErrorHandlers {
-  PropertyNoExist?: (error: errors.PropertyNoExist) => any;
-  PropertyRequired?: (error: errors.PropertyRequired) => any;
-  PropertyDeprecated?: (error: errors.PropertyDeprecated) => any;
-  PropertyValueError?: (error: errors.PropertyValueError) => any;
+  PropertyNoExist?: (error: errors.PropertyNoExist) => any; // Свойства, заданное в командной строке, нет в обрабатываемых
+  PropertyRequired?: (error: errors.PropertyRequired) => any; // Свойства, помеченного как обязательное, не предоставлено
+  PropertyDeprecated?: (error: errors.PropertyDeprecated) => any; // Свойство, заданное в командной строке, устарело
+  PropertyValueError?: (error: errors.PropertyValueError) => any; // Значение свойства не удовлетворяет ограничениям
 }
 
 export class Arguments {
@@ -82,6 +82,10 @@ export class Arguments {
     if (construct.errorHandlers) { this.addErrorHandlers(construct.errorHandlers); }
   }
 
+  /**
+   *
+   * @param {IPropertyDefinition} property
+   */
   public addProperty(property: IPropertyDefinition): void {
     if (!this.propertiesDef[property.Name]) {
       if (property.Required) {
@@ -94,6 +98,10 @@ export class Arguments {
     }
   }
 
+  /**
+   *
+   * @param {IErrorHandlers} handlers
+   */
   public addErrorHandlers(handlers: IErrorHandlers): void {
     const exitAble = (error: Error) => { console.error(error.message); process.exit(2); };
     const consoleAble = (error: Error) => { console.error(error.message); };
@@ -107,7 +115,11 @@ export class Arguments {
       handlers.PropertyValueError : exitAble;
   }
 
-  // TODO: Добавить функции перехвата ошибок
+  // TODO: Добавить распознавание --property=value
+  /**
+   *
+   * @returns {{[p: string]: IPropertyParsed}}
+   */
   public parseProperties(): { [name: string]: IPropertyParsed } {
     let propertyNameTemp: string = "";
     let propertyRequiredExist: number = this.propertiesRequired.length;
@@ -117,8 +129,7 @@ export class Arguments {
         try {
           this.properties[propertyNameTemp].Value = this.propertiesDef[propertyNameTemp].Transform(part);
         } catch (error) {
-          this.errorHandlers.PropertyValueError(
-            error.propertyValueError(this.propertiesDef[propertyNameTemp]));
+          this.errorHandlers.PropertyValueError(error.propertyValueError(this.propertiesDef[propertyNameTemp]));
         }
       } else if (part[0] === "-") {
         propertyNameTemp = part[1] === "-" ? part.substring(2) : part.substring(1);

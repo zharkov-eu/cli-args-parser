@@ -36,14 +36,15 @@ typings/
 # vs
 .vs
 
-# Generated JS
-app/*/*.js
-test/*/*.js
-*.js
+# TypeScript Source files
+*.ts
+!*.d.ts
 /nbproject/private/
+tsconfig.json
+tslint.json
 
-# Generated d.ts
-*.d.ts
+# Test files
+test/
 
 # Generated js.map
 *.js.map
