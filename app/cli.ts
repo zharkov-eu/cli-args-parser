@@ -46,14 +46,23 @@ class Property implements IPropertyParsed {
 interface IArgumentsConstruct {
   name?: string; // Название приложения, используется для вывода справки
   language?: string; // Язык справки
+  errorHandlers?: IErrorHandlers; // Обработчики ошибок
   properties?: IPropertyDefinition[]; // Массив свойств
   source?: string[]; // Массив, из которого брать аргументы
+}
+
+interface IErrorHandlers {
+  PropertyNoExist?: (error: errors.PropertyNoExist) => any;
+  PropertyRequired?: (error: errors.PropertyRequired) => any;
+  PropertyDeprecated?: (error: errors.PropertyDeprecated) => any;
+  PropertyValueError?: (error: errors.PropertyValueError) => any;
 }
 
 export class Arguments {
   private name: string;
   private language: string;
   private source: string[];
+  private errorHandlers: IErrorHandlers;
   private properties: { [name: string]: IPropertyParsed };
   private propertiesDef: { [name: string]: IPropertyDefinition };
   private propertiesRequired: string[];
@@ -70,9 +79,10 @@ export class Arguments {
         this.addProperty(property);
       });
     }
+    if (construct.errorHandlers) { this.addErrorHandlers(construct.errorHandlers); }
   }
 
-  public addProperty(property: IPropertyDefinition) {
+  public addProperty(property: IPropertyDefinition): void {
     if (!this.propertiesDef[property.Name]) {
       if (property.Required) {
         this.propertiesRequired.push(property.Name);
@@ -82,6 +92,19 @@ export class Arguments {
       }
       this.propertiesDef[property.Name] = property;
     }
+  }
+
+  public addErrorHandlers(handlers: IErrorHandlers): void {
+    const exitAble = (error: Error) => { console.error(error.message); process.exit(2); };
+    const consoleAble = (error: Error) => { console.error(error.message); };
+    this.errorHandlers.PropertyNoExist = typeof handlers.PropertyNoExist === "function" ?
+      handlers.PropertyNoExist : exitAble;
+    this.errorHandlers.PropertyRequired = typeof handlers.PropertyRequired === "function" ?
+      handlers.PropertyRequired : exitAble;
+    this.errorHandlers.PropertyDeprecated = typeof handlers.PropertyDeprecated === "function" ?
+      handlers.PropertyDeprecated : consoleAble;
+    this.errorHandlers.PropertyValueError = typeof handlers.PropertyValueError === "function" ?
+      handlers.PropertyValueError : exitAble;
   }
 
   // TODO: Добавить функции перехвата ошибок
@@ -94,7 +117,8 @@ export class Arguments {
         try {
           this.properties[propertyNameTemp].Value = this.propertiesDef[propertyNameTemp].Transform(part);
         } catch (error) {
-          error.propertyValueError(this.propertiesDef[propertyNameTemp]);
+          this.errorHandlers.PropertyValueError(
+            error.propertyValueError(this.propertiesDef[propertyNameTemp]));
         }
       } else if (part[0] === "-") {
         propertyNameTemp = part[1] === "-" ? part.substring(2) : part.substring(1);
@@ -113,10 +137,9 @@ export class Arguments {
           }
         } catch (error) {
           if (error instanceof errors.PropertyNoExist) {
-            console.error(error.message);
-            process.exit(2);
+            this.errorHandlers.PropertyNoExist(error);
           } else if (error instanceof errors.PropertyDeprecated) {
-            console.error(error.message);
+            this.errorHandlers.PropertyDeprecated(error);
           } else {
             throw error;
           }
@@ -134,10 +157,9 @@ export class Arguments {
       if (propertyRequiredExist !== 0) { errors.propertyRequired(this.propertiesDef[this.propertiesRequired[0]]); }
     } catch (error) {
       if (error instanceof errors.PropertyRequired) {
-        console.error(error.message);
-        process.exit(2);
+        this.errorHandlers.PropertyRequired(error);
       } else {
-        throw error;
+        throw new Error();
       }
     }
     return this.properties;
