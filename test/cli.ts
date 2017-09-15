@@ -6,9 +6,18 @@
 
 "use strict";
 
+import * as assert from "assert";
 import {Arguments, IPropertyDefinition} from "../app/cli";
+import * as errors from "../app/errors";
 
-// Тестирование без аргументов
+const errorQueue = [];
+
+const ErrorHandlers = {
+  PropertyDeprecated: (error) => { errorQueue.push(error); },
+  PropertyNoExist: (error) => { errorQueue.push(error); },
+  PropertyRequired: (error) => { errorQueue.push(error); },
+  PropertyValueError: (error) => { errorQueue.push(error); },
+};
 
 const RequiredProperty: IPropertyDefinition = {
   Description: "Required Property",
@@ -61,11 +70,52 @@ const ObjectProperty: IPropertyDefinition = {
 };
 
 // Проверка обязательного свойства
-const parseRequiredArgumentsSuccess = new Arguments({properties: [RequiredProperty], source: ["--Req"]});
-const parseRequiredArgumentsFault = new Arguments({properties: [RequiredProperty], source: [""]});
-console.log(parseRequiredArgumentsSuccess.parseProperties());
-console.log(parseRequiredArgumentsFault.parseProperties());
+const parseRequiredArguments = {
+  errorHandlers: ErrorHandlers,
+  properties: [RequiredProperty],
+};
 
-// // Проверка свойства типа существует/не существует
-// const parseExistArguments = new Arguments({properties: [ExistProperty]});
-// console.log(parseExistArguments.parseProperties());
+const parseRequiredArgumentsSuccess = new Arguments(
+  Object.assign(parseRequiredArguments, { source: ["--Req"] }));
+const parseRequiredArgumentsFault = new Arguments(
+  Object.assign(parseRequiredArguments, { source: [""] }));
+
+assert.deepStrictEqual(parseRequiredArgumentsSuccess.parseProperties(), {
+  Req: {
+    Modifier: "--",
+    Name: "Req",
+    RawValue: "true",
+    Value: true,
+  },
+});
+assert.equal(errorQueue.length, 0);
+assert.deepStrictEqual(parseRequiredArgumentsFault.parseProperties(), {});
+assert.equal(errorQueue.length, 1);
+assert.equal(errorQueue[0] instanceof errors.PropertyRequired, true);
+errorQueue.pop();
+
+// Проверка свойства типа существует/не существует
+// const parseExistArguments = new Arguments({
+//   errorHandlers: ErrorHandlers,
+//   properties: [ExistProperty],
+// });
+//
+// const parseExistArgumentsSuccess = Object.apply(parseExistArguments, { source: ["--Ext"]});
+// const parseExistArgumentsFault = Object.apply(parseExistArguments, { source: ["--Ext", "value"] });
+//
+// assert.deepStrictEqual(parseExistArgumentsSuccess.parseProperties(), {
+//   Ext: {
+//     Modifier: "--",
+//     Name: "Ext",
+//     RawValue: "true",
+//     Value: true,
+//   },
+// });
+// assert.equal(errorQueue.length, 0);
+// assert.deepStrictEqual(parseExistArgumentsFault.parseProperties(), {});
+// assert.equal(errorQueue.length, 1);
+// // TODO: Исправить прототип ошибки из PropertyNoExist на PropertyValue
+// // assert.equal(errorQueue[0] instanceof errors.PropertyValueError, true);
+// errorQueue.pop();
+
+// Проверка логического свойства

@@ -10,6 +10,9 @@ import * as process from "process";
 import * as errors from "./errors";
 import * as parser from "./parser";
 
+// noinspection TsLint
+const packageJSON = require("../package.json");
+
 type TType = "boolean" | "integer" | "float" | "string" | "array" | "object" | "exist" | "user";
 
 interface IProperty {
@@ -52,8 +55,8 @@ interface IArgumentsConstruct {
 }
 
 interface IErrorHandlers {
-  PropertyNoExist?: (error: errors.PropertyNoExist) => any; // Свойства, заданное в командной строке, нет в обрабатываемых
-  PropertyRequired?: (error: errors.PropertyRequired) => any; // Свойства, помеченного как обязательное, не предоставлено
+  PropertyNoExist?: (error: errors.PropertyNoExist) => any; // Свойства нет в обрабатываемых
+  PropertyRequired?: (error: errors.PropertyRequired) => any; // Обязательного свойства не предоставлено
   PropertyDeprecated?: (error: errors.PropertyDeprecated) => any; // Свойство, заданное в командной строке, устарело
   PropertyValueError?: (error: errors.PropertyValueError) => any; // Значение свойства не удовлетворяет ограничениям
 }
@@ -68,18 +71,19 @@ export class Arguments {
   private propertiesRequired: string[];
 
   constructor(construct?: IArgumentsConstruct) {
-    this.name = construct.name || ""; // TODO: Получать название из package.json;
+    this.name = construct.name || packageJSON.name;
     this.language = construct.language || "en"; // TODO: Интернационализация, список доступных языков
     this.source = construct.source || process.argv.slice(2);
     this.properties = {};
     this.propertiesDef = {};
     this.propertiesRequired = [];
+    this.errorHandlers = {};
+    this.addErrorHandlers(construct.errorHandlers);
     if (Array.isArray(construct.properties) && construct.properties.length) {
       construct.properties.forEach((property) => {
         this.addProperty(property);
       });
     }
-    if (construct.errorHandlers) { this.addErrorHandlers(construct.errorHandlers); }
   }
 
   /**
@@ -103,6 +107,7 @@ export class Arguments {
    * @param {IErrorHandlers} handlers
    */
   public addErrorHandlers(handlers: IErrorHandlers): void {
+    if (typeof handlers !== "object") { handlers = {}; }
     const exitAble = (error: Error) => { console.error(error.message); process.exit(2); };
     const consoleAble = (error: Error) => { console.error(error.message); };
     this.errorHandlers.PropertyNoExist = typeof handlers.PropertyNoExist === "function" ?
