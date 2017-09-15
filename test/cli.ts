@@ -69,10 +69,20 @@ const ObjectProperty: IPropertyDefinition = {
   Type: "object",
 };
 
-// Проверка обязательного свойства
+/*------------------------------------Проверка обязательного свойства----------------------------------*/
+
 const parseRequiredArguments = {
   errorHandlers: ErrorHandlers,
   properties: [RequiredProperty],
+};
+
+const parseRequiredArgumentsExpected = {
+  Req: {
+    Modifier: "--",
+    Name: "Req",
+    RawValue: "true",
+    Value: true,
+  },
 };
 
 const parseRequiredArgumentsSuccess = new Arguments(
@@ -80,42 +90,69 @@ const parseRequiredArgumentsSuccess = new Arguments(
 const parseRequiredArgumentsFault = new Arguments(
   Object.assign(parseRequiredArguments, { source: [""] }));
 
-assert.deepStrictEqual(parseRequiredArgumentsSuccess.parseProperties(), {
-  Req: {
-    Modifier: "--",
-    Name: "Req",
-    RawValue: "true",
-    Value: true,
-  },
-});
+assert.deepStrictEqual(parseRequiredArgumentsSuccess.parseProperties(), parseRequiredArgumentsExpected);
 assert.equal(errorQueue.length, 0);
 assert.deepStrictEqual(parseRequiredArgumentsFault.parseProperties(), {});
 assert.equal(errorQueue.length, 1);
 assert.equal(errorQueue[0] instanceof errors.PropertyRequired, true);
 errorQueue.pop();
 
-// Проверка свойства типа существует/не существует
-// const parseExistArguments = new Arguments({
-//   errorHandlers: ErrorHandlers,
-//   properties: [ExistProperty],
-// });
-//
-// const parseExistArgumentsSuccess = Object.apply(parseExistArguments, { source: ["--Ext"]});
-// const parseExistArgumentsFault = Object.apply(parseExistArguments, { source: ["--Ext", "value"] });
-//
-// assert.deepStrictEqual(parseExistArgumentsSuccess.parseProperties(), {
-//   Ext: {
-//     Modifier: "--",
-//     Name: "Ext",
-//     RawValue: "true",
-//     Value: true,
-//   },
-// });
-// assert.equal(errorQueue.length, 0);
-// assert.deepStrictEqual(parseExistArgumentsFault.parseProperties(), {});
-// assert.equal(errorQueue.length, 1);
-// // TODO: Исправить прототип ошибки из PropertyNoExist на PropertyValue
-// // assert.equal(errorQueue[0] instanceof errors.PropertyValueError, true);
-// errorQueue.pop();
+/*-----------------------------------------------------------------------------------------------------*/
+/*-Проверка свойства типа существует/не существует, проверка ошибки при задании не ожидаемого свойства-*/
 
-// Проверка логического свойства
+const parseExistArguments = {
+  errorHandlers: ErrorHandlers,
+  properties: [ExistProperty],
+};
+
+const parseExistArgumentsExpected = {
+  Ext: {
+    Modifier: "--",
+    Name: "Ext",
+    RawValue: "true",
+    Value: true,
+  },
+};
+
+const parseExistArgumentsSuccess = new Arguments(
+  Object.assign(parseExistArguments, { source: ["--Ext"]}));
+const parseExistArgumentsFault = new Arguments(
+  Object.assign(parseExistArguments, { source: ["--Ext.value"] }));
+
+assert.deepStrictEqual(parseExistArgumentsSuccess.parseProperties(), parseExistArgumentsExpected);
+assert.equal(errorQueue.length, 0);
+assert.deepStrictEqual(parseExistArgumentsFault.parseProperties(), {});
+assert.equal(errorQueue.length, 1);
+assert.equal(errorQueue[0] instanceof errors.PropertyNoExist, true);
+errorQueue.pop();
+
+/*-----------------------------------------------------------------------------------------------------*/
+/*-----------------------------------Проверка логического свойства-------------------------------------*/
+
+const parseBooleanArguments = {
+  errorHandlers: ErrorHandlers,
+  properties: [BooleanProperty],
+};
+
+const parseBooleanArgumentsExpected = {
+  Bool: {
+    Modifier: "--",
+    Name: "Bool",
+    RawValue: "false",
+    Value: false,
+  },
+};
+
+const parseBooleanArgumentsSuccess = new Arguments(
+  Object.assign(parseBooleanArguments, { source: ["--Bool", "false"]}));
+const parseBooleanArgumentsFault = new Arguments(
+  Object.assign(parseBooleanArguments, { source: ["--Bool", "10"] }));
+
+assert.deepStrictEqual(parseBooleanArgumentsSuccess.parseProperties(), parseBooleanArgumentsExpected);
+assert.equal(errorQueue.length, 0);
+assert.deepStrictEqual(parseBooleanArgumentsFault.parseProperties(), {});
+assert.equal(errorQueue.length, 1);
+assert.equal(errorQueue[0] instanceof errors.PropertyValueError, true);
+errorQueue.pop();
+
+/*-----------------------------------------------------------------------------------------------------*/

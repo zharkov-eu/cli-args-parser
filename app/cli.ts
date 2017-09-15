@@ -134,7 +134,7 @@ export class Arguments {
         try {
           this.properties[propertyNameTemp].Value = this.propertiesDef[propertyNameTemp].Transform(part);
         } catch (error) {
-          this.errorHandlers.PropertyValueError(error.propertyValueError(this.propertiesDef[propertyNameTemp]));
+          this.errorHandlers.PropertyValueError(new errors.PropertyValueError(this.propertiesDef[propertyNameTemp]));
         }
       } else if (part[0] === "-") {
         propertyNameTemp = part[1] === "-" ? part.substring(2) : part.substring(1);
