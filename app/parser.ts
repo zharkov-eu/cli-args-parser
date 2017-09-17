@@ -31,5 +31,8 @@ export const type = {
   object: (text: string): any => {
     return JSON.parse(text);
   },
+  string: (text: string): string => {
+    return text.toString();
+  },
 };
 

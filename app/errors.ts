@@ -49,7 +49,7 @@ export class PropertyValueError extends Error {
   constructor(property: IPropertyDefinition) {
     super(`${en.getText("Property {0}{1} value not valid. Awaiting type {2}",
       property.Modifier, property.Name, property.Type)}`);
-    Object.setPrototypeOf(this, PropertyRequired.prototype);
+    Object.setPrototypeOf(this, PropertyValueError.prototype);
   }
 }
 

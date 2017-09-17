@@ -96,7 +96,7 @@ export class Arguments {
         this.propertiesRequired.push(property.Name);
       }
       if (typeof property.Transform !== "function") {
-        property.Transform = parser[property.Type];
+        property.Transform = parser.type[property.Type];
       }
       this.propertiesDef[property.Name] = property;
     }

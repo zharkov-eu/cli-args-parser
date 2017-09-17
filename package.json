@@ -7,11 +7,13 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha test/cli.js"
   },
   "author": "Evgeni Zharkov",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^8.0.28"
+    "@types/mocha": "^2.2.43",
+    "@types/node": "^8.0.28",
+    "mocha": "^3.5.3"
   }
 }
