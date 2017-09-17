@@ -123,7 +123,7 @@ export class Arguments {
   // TODO: Добавить распознавание --property=value
   /**
    *
-   * @returns {{[p: string]: IPropertyParsed}}
+   * @returns {{[name: string]: IPropertyParsed}}
    */
   public parseProperties(): { [name: string]: IPropertyParsed } {
     let propertyNameTemp: string = "";
