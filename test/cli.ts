@@ -280,3 +280,45 @@ describe("Проверка целочисленного свойства", () =>
 });
 
 /*-----------------------------------------------------------------------------------------------------*/
+/*-----------------------------------Проверка числового свойства с плавающей точкой--------------------*/
+
+describe("Проверка числового свойства с плавающей точкой", () => {
+  const parseFloatArguments = {
+    errorHandlers: ErrorHandlers,
+    properties: [FloatProperty],
+  };
+
+  const parseFloatArgumentsExpected = {
+    Flt: {
+      Modifier: "--",
+      Name: "Flt",
+      RawValue: "182.1212",
+      Value: 182.1212,
+    },
+  };
+
+  const parseFloatArgumentsSuccess = new Arguments(
+    Object.assign(parseFloatArguments, { source: ["--Flt", "182.1212"]}));
+  const parseFloatArgumentsFault = new Arguments(
+    Object.assign(parseFloatArguments, { source: ["--Flt", "f12.12"] }));
+
+  it("Обработка числового свойства с плавающей точкой", () => {
+    errorQueue.length = 0;
+    assert.deepStrictEqual(parseFloatArgumentsSuccess.parseProperties(), parseFloatArgumentsExpected);
+  });
+  it("Массив ошибок пуст", () => {
+    assert.equal(errorQueue.length, 0);
+  });
+  it("Обработка числового свойства с плавающей точкой с невалидным значением", () => {
+    errorQueue.length = 0;
+    assert.deepStrictEqual((parseFloatArgumentsFault.parseProperties()).Flt.Value, undefined);
+  });
+  it("Массив ошибок содержит одну ошибку", () => {
+    assert.equal(errorQueue.length, 1);
+  });
+  it("Ошибка относится к классу PropertyValueError", () => {
+    assert.equal(errorQueue[0] instanceof errors.PropertyValueError, true);
+  });
+});
+
+/*-----------------------------------------------------------------------------------------------------*/
