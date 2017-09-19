@@ -180,4 +180,27 @@ export class Arguments {
     }
     return this.properties;
   }
+
+  /**
+   *
+   */
+  private checkEqualsSign() {
+    const source = [];
+    this.source.forEach((part: string): void => {
+      if (part.indexOf("=") !== -1) {
+        let probablyName = part.split("=")[0];
+        probablyName = probablyName[1] === "-"
+          ? probablyName.substring(2) : probablyName.substring(1);
+        const probablyModifier = probablyName[1] === "-" ? "--" : "-";
+        if (this.propertiesDef[probablyName] && this.propertiesDef[probablyName].Modifier === probablyModifier) {
+          source.push(part.split("=")[0], part.split("=").shift());
+        } else {
+          source.push(part);
+        }
+      } else {
+        source.push(part);
+      }
+    });
+    this.source = source;
+  }
 }
