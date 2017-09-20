@@ -322,3 +322,75 @@ describe("Проверка числового свойства с плавающ
 });
 
 /*-----------------------------------------------------------------------------------------------------*/
+/*-----------------------------------Проверка разделения знаком равно----------------------------------*/
+
+describe("Проверка разделения знаком равно", () => {
+  const parseBooleanArguments = {
+    errorHandlers: ErrorHandlers,
+    properties: [BooleanProperty],
+  };
+
+  const parseBooleanArgumentsExpected = {
+    Bool: {
+      Modifier: "--",
+      Name: "Bool",
+      RawValue: "false",
+      Value: false,
+    },
+  };
+
+  const parseBooleanArgumentsSuccess = new Arguments(
+    Object.assign(parseBooleanArguments, { source: ["--Bool=false"]}));
+
+  it("Обработка разделения знаком равно", () => {
+    errorQueue.length = 0;
+    assert.deepStrictEqual(parseBooleanArgumentsSuccess.parseProperties(), parseBooleanArgumentsExpected);
+  });
+  it("Массив ошибок пуст", () => {
+    assert.equal(errorQueue.length, 0);
+  });
+});
+
+/*-----------------------------------------------------------------------------------------------------*/
+/*-----------------------------------Комплексная проверка----------------------------------------------*/
+
+describe("Комплексная проверка", () => {
+  const parseComplexArguments = {
+    errorHandlers: ErrorHandlers,
+    properties: [BooleanProperty, IntegerProperty, RequiredProperty],
+  };
+
+  const parseComplexArgumentsExpected = {
+    Bool: {
+      Modifier: "--",
+      Name: "Bool",
+      RawValue: "false",
+      Value: false,
+    },
+    Int: {
+      Modifier: "--",
+      Name: "Int",
+      RawValue: "190",
+      Value: 190,
+    },
+    Req: {
+      Modifier: "--",
+      Name: "Req",
+      RawValue: "true",
+      Value: true,
+    },
+  };
+
+  const parseComplexArgumentsSuccess = new Arguments(
+    Object.assign(parseComplexArguments, { source: ["--Bool=false", "--Req", "--Int", "190"]}));
+
+  it("Комплексная проверка (разделение пробелом, знаком равно, обязательные свойства)", () => {
+    errorQueue.length = 0;
+    assert.deepStrictEqual(parseComplexArgumentsSuccess.parseProperties(), parseComplexArgumentsExpected);
+  });
+  it("Массив ошибок пуст", () => {
+    assert.equal(errorQueue.length, 0);
+  });
+});
+
+/*-----------------------------------------------------------------------------------------------------*/

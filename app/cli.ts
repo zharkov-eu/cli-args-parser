@@ -120,12 +120,8 @@ export class Arguments {
       handlers.PropertyValueError : exitAble;
   }
 
-  // TODO: Добавить распознавание --property=value
-  /**
-   *
-   * @returns {{[name: string]: IPropertyParsed}}
-   */
   public parseProperties(): { [name: string]: IPropertyParsed } {
+    this.checkEqualsSign();
     let propertyNameTemp: string = "";
     let propertyRequiredExist: number = this.propertiesRequired.length;
     this.source.forEach((part: string, index: number) => {
@@ -136,6 +132,7 @@ export class Arguments {
         } catch (error) {
           this.errorHandlers.PropertyValueError(new errors.PropertyValueError(this.propertiesDef[propertyNameTemp]));
         }
+        propertyNameTemp = "";
       } else if (part[0] === "-") {
         propertyNameTemp = part[1] === "-" ? part.substring(2) : part.substring(1);
         const property: IPropertyParsed = {
@@ -188,12 +185,13 @@ export class Arguments {
     const source = [];
     this.source.forEach((part: string): void => {
       if (part.indexOf("=") !== -1) {
-        let probablyName = part.split("=")[0];
-        probablyName = probablyName[1] === "-"
-          ? probablyName.substring(2) : probablyName.substring(1);
-        const probablyModifier = probablyName[1] === "-" ? "--" : "-";
+        const partSplit = part.split("=");
+        const probablyProperty = partSplit[0];
+        const probablyName = probablyProperty[1] === "-"
+          ? probablyProperty.substring(2) : probablyProperty.substring(1);
+        const probablyModifier = probablyProperty[1] === "-" ? "--" : "-";
         if (this.propertiesDef[probablyName] && this.propertiesDef[probablyName].Modifier === probablyModifier) {
-          source.push(part.split("=")[0], part.split("=").shift());
+          source.push(partSplit.shift(), partSplit.join(""));
         } else {
           source.push(part);
         }
