@@ -11,15 +11,14 @@ import * as process from "process";
 import * as errors from "./errors";
 import * as parser from "./parser";
 import Language from "./gettext";
-import {error} from "util";
 import * as fs from "fs";
 
 // noinspection TsLint
 const packageJSON = require("../package.json");
 
-type TType = "boolean" | "integer" | "float" | "string" | "array" | "object" | "exist" | "user";
+export type TType = "boolean" | "integer" | "float" | "string" | "array" | "object" | "exist" | "user";
 
-interface IProperty {
+export interface IProperty {
   Modifier: string; // Модификатор (- | --)
   Name: string; // Название свойства
 }
@@ -37,7 +36,7 @@ export interface IPropertyDefinition extends IProperty {
   Required?: boolean; // Обязательно ли наличие?
 }
 
-interface IArgumentsConstruct {
+export interface IArgumentsConstruct {
   name?: string; // Название приложения, используется для вывода справки
   language?: string; // Язык справки
   errorHandlers?: IErrorHandlers; // Обработчики ошибок
@@ -45,7 +44,7 @@ interface IArgumentsConstruct {
   source?: string[]; // Массив, из которого брать аргументы
 }
 
-interface IErrorHandlers {
+export interface IErrorHandlers {
   PropertyNoExist?: (error: errors.PropertyNoExist) => any; // Свойства нет в обрабатываемых
   PropertyRequired?: (error: errors.PropertyRequired) => any; // Обязательного свойства не предоставлено
   PropertyDeprecated?: (error: errors.PropertyDeprecated) => any; // Свойство, заданное в командной строке, устарело
