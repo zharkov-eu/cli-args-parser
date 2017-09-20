@@ -7,7 +7,6 @@
 "use strict";
 
 import * as fs from "fs";
-import * as path from "path";
 
 export default class Language {
   public static loadDictionary(filepath: string): {[index: string]: string} {
@@ -28,8 +27,6 @@ export default class Language {
   }
 
   public getText(text: string, ...args): string {
-    return Language.format(this.dictionary[text], ...args);
+    return this.dictionary[text] ? Language.format(this.dictionary[text], ...args) : Language.format(text, ...args);
   }
 }
-
-export const en = new Language(Language.loadDictionary(path.resolve(__dirname, "../locale/en.json")));

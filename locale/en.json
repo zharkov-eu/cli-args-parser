@@ -1,7 +1,0 @@
-{
-  "Property {0}{1} not allowed": "Property {0}{1} not allowed",
-  "Property {0}{1} is required": "Property {0}{1} is required",
-  "Property {0}{1} is deprecated": "Property {0}{1} is deprecated",
-  "use {0}{1} instead": "use {0}{1} instead",
-  "Property {0}{1} value not valid. Awaiting type {2}": "Property {0}{1} value not valid. Awaiting type {2}"
-}

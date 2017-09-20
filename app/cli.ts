@@ -6,9 +6,11 @@
 
 "use strict";
 
+import * as path from "path";
 import * as process from "process";
 import * as errors from "./errors";
 import * as parser from "./parser";
+import Language from "./gettext";
 
 // noinspection TsLint
 const packageJSON = require("../package.json");
@@ -31,19 +33,6 @@ export interface IPropertyDefinition extends IProperty {
   Type: TType; // Тип свойства
   Transform?: (rawValue: string) => any; // Собственная валидация и трансформация свойства
   Required?: boolean; // Обязательно ли наличие?
-}
-
-class Property implements IPropertyParsed {
-  public Modifier: string;
-  public Name: string;
-  public RawValue: string;
-  public Value: TType;
-
-  constructor(property: IPropertyParsed) {
-    this.Modifier = property.Modifier;
-    this.Name = property.Name;
-    this.RawValue = property.RawValue;
-  }
 }
 
 interface IArgumentsConstruct {
@@ -72,7 +61,7 @@ export class Arguments {
 
   constructor(construct?: IArgumentsConstruct) {
     this.name = construct.name || packageJSON.name;
-    this.language = construct.language || "en"; // TODO: Интернационализация, список доступных языков
+    this.language = construct.language || "en";
     this.source = construct.source || process.argv.slice(2);
     this.properties = {};
     this.propertiesDef = {};
@@ -124,7 +113,7 @@ export class Arguments {
     this.checkEqualsSign();
     let propertyNameTemp: string = "";
     let propertyRequiredExist: number = this.propertiesRequired.length;
-    this.source.forEach((part: string, index: number) => {
+    this.source.forEach((part: string) => {
       if (propertyNameTemp) {
         this.properties[propertyNameTemp].RawValue = part;
         try {
@@ -202,3 +191,5 @@ export class Arguments {
     this.source = source;
   }
 }
+
+export const dictionary = new Language(Language.loadDictionary(path.resolve(__dirname, "../locale/ru.json")));
