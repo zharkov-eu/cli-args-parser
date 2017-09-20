@@ -1,5 +1,5 @@
 {
-  "name": "cli-arguments",
+  "name": "cli-args-parser",
   "version": "1.0.0",
   "description": "Parse command line interpreter arguments",
   "main": "app/cli.js",
@@ -8,6 +8,10 @@
   },
   "scripts": {
     "test": "mocha test/cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zharkov-eu/cli-args-parser"
   },
   "author": "Evgeni Zharkov",
   "license": "MIT",
