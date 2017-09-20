@@ -6,11 +6,16 @@
 
 "use strict";
 
-import {IPropertyDefinition, IPropertyParsed, dictionary} from "./cli";
+import {IPropertyDefinition, IPropertyParsed} from "./cli";
+import Language from "./gettext";
+
+export class LocalizedError extends Error {
+  public static dictionary: Language = new Language();
+}
 
 export class PropertyNoExist extends Error {
   constructor(property: IPropertyParsed) {
-    super(`${dictionary.getText("Property {0}{1} not allowed",
+    super(`${LocalizedError.dictionary.getText("Property {0}{1} not allowed",
       property.Modifier, property.Name)}`);
     Object.setPrototypeOf(this, PropertyNoExist.prototype);
   }
@@ -22,7 +27,7 @@ export function propertyNoExist(property: IPropertyParsed) {
 
 export class PropertyRequired extends Error {
   constructor(property: IPropertyParsed) {
-    super(`${dictionary.getText("Property {0}{1} is required",
+    super(`${LocalizedError.dictionary.getText("Property {0}{1} is required",
       property.Modifier, property.Name)}`);
     Object.setPrototypeOf(this, PropertyRequired.prototype);
   }
@@ -34,7 +39,7 @@ export function propertyRequired(property: IPropertyParsed) {
 
 export class PropertyDeprecated extends Error {
   constructor(property: IPropertyParsed) {
-    super(`${dictionary.getText("Property {0}{1} is deprecated",
+    super(`${LocalizedError.dictionary.getText("Property {0}{1} is deprecated",
       property.Modifier, property.Name)}`);
     Object.setPrototypeOf(this, PropertyDeprecated.prototype);
   }
@@ -46,7 +51,7 @@ export function propertyDeprecated(property: IPropertyParsed) {
 
 export class PropertyValueError extends Error {
   constructor(property: IPropertyDefinition) {
-    super(`${dictionary.getText("Property {0}{1} value not valid. Awaiting type {2}",
+    super(`${LocalizedError.dictionary.getText("Property {0}{1} value not valid. Awaiting type {2}",
       property.Modifier, property.Name, property.Type)}`);
     Object.setPrototypeOf(this, PropertyValueError.prototype);
   }

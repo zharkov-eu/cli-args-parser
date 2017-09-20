@@ -23,7 +23,7 @@ export default class Language {
   private dictionary: {[index: string]: string};
 
   constructor(dictionary?: {[index: string]: string}) {
-    this.dictionary = dictionary;
+    this.dictionary = dictionary || {};
   }
 
   public getText(text: string, ...args): string {

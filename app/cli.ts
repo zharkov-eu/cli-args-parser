@@ -11,6 +11,8 @@ import * as process from "process";
 import * as errors from "./errors";
 import * as parser from "./parser";
 import Language from "./gettext";
+import {error} from "util";
+import * as fs from "fs";
 
 // noinspection TsLint
 const packageJSON = require("../package.json");
@@ -67,6 +69,7 @@ export class Arguments {
     this.propertiesDef = {};
     this.propertiesRequired = [];
     this.errorHandlers = {};
+    this.setLanguage();
     this.addErrorHandlers(construct.errorHandlers);
     if (Array.isArray(construct.properties) && construct.properties.length) {
       construct.properties.forEach((property) => {
@@ -167,10 +170,7 @@ export class Arguments {
     return this.properties;
   }
 
-  /**
-   *
-   */
-  private checkEqualsSign() {
+   private checkEqualsSign() {
     const source = [];
     this.source.forEach((part: string): void => {
       if (part.indexOf("=") !== -1) {
@@ -190,6 +190,10 @@ export class Arguments {
     });
     this.source = source;
   }
-}
 
-export const dictionary = new Language(Language.loadDictionary(path.resolve(__dirname, "../locale/ru.json")));
+  private setLanguage() {
+    const dictionaryPath = path.resolve(__dirname, `../locale/${this.language}.json`);
+    const dictionaryExist = fs.existsSync(dictionaryPath);
+    if (dictionaryExist) { errors.LocalizedError.dictionary = new Language(Language.loadDictionary(dictionaryPath)); }
+  }
+}
